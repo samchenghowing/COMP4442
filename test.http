@@ -1,0 +1,15 @@
+/*
+This file can help you to test the api locally by installing the httpBook extensions in VScode. 
+The password of Alice is 12345678.
+*/
+POST http://127.0.0.1:5000/getDriverByID
+Content-Type: application/json
+
+{"driverID": "hanhui1000002"}
+
+HTTP/1.1 200  - OK
+server: Werkzeug/2.2.2 Python/3.11.5
+date: Mon, 18 Mar 2024 09:07:17 GMT
+content-type: application/json
+content-length: 58
+connection: close
