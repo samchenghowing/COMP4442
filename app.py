@@ -3,13 +3,36 @@
 import argparse
 from os import walk
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
 
 from flask import Flask, request, jsonify, send_file
 
 # DEFAULT_DATA_SOURCE = "s3://comp4442project2024spring/detail-records/detail_record_2017_01_02_08_00_00"
 # DEFAULT_OUTPUT_URL  = "s3://comp4442project2024spring/result/csv"
-DEFAULT_DATA_SOURCE = "./detail-records/detail_record_2017_01_02_08_00_00"
+DEFAULT_DATA_SOURCE = "./detail-records"
 DEFAULT_OUTPUT_URL  = "./result/csv"
+
+schema = StructType() \
+      .add("driverID",StringType(),True) \
+      .add("carPlateNumber",StringType(),True) \
+      .add("Latitude",DoubleType(),True) \
+      .add("Longtitude",DoubleType(),True) \
+      .add("Speed",IntegerType(),True) \
+      .add("Direction",IntegerType(),True) \
+      .add("siteName",StringType(),True) \
+      .add("Time",DateType(),True) \
+      .add("isRapidlySpeedup",IntegerType(),True) \
+      .add("isRapidlySlowdown",IntegerType(),True) \
+      .add("isNeutralSlide",IntegerType(),True) \
+      .add("isNeutralSlideFinished",IntegerType(),True) \
+      .add("neutralSlideTime",IntegerType(),True) \
+      .add("isOverspeed",IntegerType(),True) \
+      .add("isOverspeedFinished",IntegerType(),True) \
+      .add("overspeedTime",IntegerType(),True) \
+      .add("isFatigueDriving",IntegerType(),True) \
+      .add("isHthrottleStop",IntegerType(),True) \
+      .add("isOilLeak",IntegerType(),True)
 
 application = Flask(__name__)
 
@@ -27,16 +50,14 @@ def getDriverByID():
     json_data = request.get_json()
     driverID = json_data['driverID']
     
-    data_source="./detail-records/detail_record_2017_01_02_08_00_00"
+    data_source="./detail-records"
 
     with SparkSession.builder.appName("Calculate rapidly speedup").getOrCreate() as spark:
-        # Load the restaurant violation CSV data
         if data_source is not None:
-            df = spark.read \
-                    .csv(data_source, inferSchema=True) \
-                    .toDF("driverID","carPlateNumber","Latitude","Longtitude","Speed","Direction","siteName","Time", \
-                          "isRapidlySpeedup","isRapidlySlowdown","isNeutralSlide","isNeutralSlideFinished","neutralSlideTime", \
-                            "isOverspeed","isOverspeedFinished","isOverspeedFinished","overspeedTime","isFatigueDriving","isHthrottleStop","isOilLeak")
+            df = spark.read.format("csv") \
+                        .option("header", False) \
+                        .schema(schema) \
+                        .load(data_source)
 
         # Create an in-memory DataFrame to query
         df.createOrReplaceTempView("rapidly_speedup")
@@ -63,11 +84,10 @@ def calculate_rapidly_speedup(data_source=DEFAULT_DATA_SOURCE, output_uri=DEFAUL
     with SparkSession.builder.appName("Calculate rapidly speedup").getOrCreate() as spark:
         # Load the restaurant violation CSV data
         if data_source is not None:
-            df = spark.read \
-                    .csv(data_source, inferSchema=True) \
-                    .toDF("driverID","carPlateNumber","Latitude","Longtitude","Speed","Direction","siteName","Time", \
-                          "isRapidlySpeedup","isRapidlySlowdown","isNeutralSlide","isNeutralSlideFinished","neutralSlideTime", \
-                            "isOverspeed","isOverspeedFinished","isOverspeedFinished","overspeedTime","isFatigueDriving","isHthrottleStop","isOilLeak")
+            df = spark.read.format("csv") \
+                        .option("header", False) \
+                        .schema(schema) \
+                        .load(data_source)
 
         # Create an in-memory DataFrame to query
         df.createOrReplaceTempView("rapidly_speedup")
