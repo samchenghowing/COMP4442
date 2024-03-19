@@ -1,14 +1,13 @@
 # https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-gs.html
 
 import argparse
-from os import walk
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
 from flask import Flask, request, jsonify, send_file
 
-# DEFAULT_DATA_SOURCE = "s3://comp4442project2024spring/detail-records/detail_record_2017_01_02_08_00_00"
+# DEFAULT_DATA_SOURCE = "s3://comp4442project2024spring/detail-records"
 # DEFAULT_OUTPUT_URL  = "s3://comp4442project2024spring/result/csv"
 DEFAULT_DATA_SOURCE = "./detail-records"
 DEFAULT_OUTPUT_URL  = "./result/csv"
@@ -42,47 +41,27 @@ def index():
 
 @application.route("/hello")
 def hello():
-    calculate_rapidly_speedup()
     return "Hello World!"
 
 @application.route("/getDriverByID", methods=['POST'])
 def getDriverByID():
     json_data = request.get_json()
     driverID = json_data['driverID']
-    
-    data_source="./detail-records"
 
-    with SparkSession.builder.appName("Calculate rapidly speedup").getOrCreate() as spark:
-        if data_source is not None:
-            df = spark.read.format("csv") \
-                        .option("header", False) \
-                        .schema(schema) \
-                        .load(data_source)
-
-        # Create an in-memory DataFrame to query
-        df.createOrReplaceTempView("rapidly_speedup")
-
-        # Create a DataFrame of the top 10 restaurants with the most Red violations
-        top_rapidly_speedup = spark.sql("""SELECT count(*) 
-          FROM rapidly_speedup 
-          WHERE isRapidlySpeedup = '1' and driverID = {DID}
-          """, DID=driverID)
-        
-        total_speedup_count = top_rapidly_speedup.collect()
-        json_data = {"driverID": driverID, "total_speedup_count": total_speedup_count}
-
+    json_data = getDriverSummary(driverID, 0, 10)
     return jsonify(json_data), 200
 
-def calculate_rapidly_speedup(data_source=DEFAULT_DATA_SOURCE, output_uri=DEFAULT_OUTPUT_URL):
+def getDriverSummary(driverID, startDate, endDate, data_source=DEFAULT_DATA_SOURCE, output_uri=DEFAULT_OUTPUT_URL):
     """
-    Processes sample food establishment inspection data and queries the data to find the top 10 establishments
-    with the most Red violations from 2006 to 2020.
+    a) Generate a summary to show the driving behavior of each driver. 
+    You are required to display the driving behavior information during the given period in a HTML table.
 
+    :param driverID: The requested id of the driver
+    :param period: The given driving period of the driver
     :param data_source: The URI of your food establishment data CSV, such as 's3://DOC-EXAMPLE-BUCKET/food-establishment-data.csv'.
     :param output_uri: The URI where output is written, such as 's3://DOC-EXAMPLE-BUCKET/restaurant_violation_results'.
     """
-    with SparkSession.builder.appName("Calculate rapidly speedup").getOrCreate() as spark:
-        # Load the restaurant violation CSV data
+    with SparkSession.builder.appName("Generate driver summary").getOrCreate() as spark:
         if data_source is not None:
             df = spark.read.format("csv") \
                         .option("header", False) \
@@ -90,17 +69,23 @@ def calculate_rapidly_speedup(data_source=DEFAULT_DATA_SOURCE, output_uri=DEFAUL
                         .load(data_source)
 
         # Create an in-memory DataFrame to query
-        df.createOrReplaceTempView("rapidly_speedup")
+        df.createOrReplaceTempView("driver_summary")
 
-        # Create a DataFrame of the top 10 restaurants with the most Red violations
-        top_rapidly_speedup_drivers = spark.sql("""SELECT driverID, count(*) AS total_rapidly_speedup 
-          FROM rapidly_speedup 
-          WHERE isRapidlySpeedup = '1' 
-          GROUP BY driverID 
-          ORDER BY total_rapidly_speedup DESC LIMIT 10""")
+        # Create a DataFrame of driver_summary
+        # top_rapidly_speedup = spark.sql("""SELECT driverID, count(*) 
+        #     FROM driver_summary 
+        #     WHERE isRapidlySpeedup = '1' and driverID = {DID}
+        #     GROUP BY driverID
+        #     """, DID=driverID)
 
-        # Write the results to the specified output URI
-        top_rapidly_speedup_drivers.write.option("header", "true").mode("overwrite").csv(output_uri)
+        top_rapidly_speedup = spark.sql("""SELECT * 
+            FROM driver_summary 
+            WHERE isRapidlySpeedup = '1' and driverID = {DID}
+            """, DID=driverID)
+        
+        total_speedup_count = top_rapidly_speedup.collect()
+        json_data = {"driverID": driverID, "total_speedup_count": total_speedup_count}
+        return json_data
 
 if __name__ == "__main__":
     application.run(port=5000, debug=True)
