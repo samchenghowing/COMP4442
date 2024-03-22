@@ -8,10 +8,13 @@ from pyspark.sql.types import *
 
 from flask import Flask, request, jsonify, send_file
 
-# DEFAULT_DATA_SOURCE = "s3://comp4442project2024spring/detail-records"
-# DEFAULT_OUTPUT_URL  = "s3://comp4442project2024spring/result/csv"
-DEFAULT_DATA_SOURCE = "./detail-records"
-DEFAULT_OUTPUT_URL  = "./result/csv"
+debugMode = True
+if debugMode:
+    DEFAULT_DATA_SOURCE = "./detail-records"
+    DEFAULT_OUTPUT_URL  = "./result/csv"
+else:
+    DEFAULT_DATA_SOURCE = "s3://comp4442project2024spring/detail-records"
+    DEFAULT_OUTPUT_URL  = "s3://comp4442project2024spring/result/csv"
 
 schema = StructType() \
       .add("driverID",StringType(),True) \
@@ -42,7 +45,9 @@ def index():
 
 @application.route("/hello")
 def hello():
-    return "Hello World!"
+    # testing
+    json_data = getDriverSummary("hanhui1000002", "2017-01-01 00:00:00", "2017-01-02 00:00:00")
+    return jsonify(json_data), 200
 
 @application.route("/getDriverByID", methods=['POST'])
 def getDriverByID():
@@ -59,8 +64,9 @@ def getDriverSummary(driverID, startDate, endDate, data_source=DEFAULT_DATA_SOUR
     The information includes but not limited to the car plate number, the cumulative 
     number of times of overspeed and fatigue driving, the total time of overspeed and neutral slide.
 
-    :param driverID: The requested id of the driver
-    :param period: The given driving period of the driver
+    :param driverID: The requested ID of the driver
+    :param startDate: The given start date driving period
+    :param endDate: The given end date driving period
     :param data_source: The URI of your food establishment data CSV, such as 's3://DOC-EXAMPLE-BUCKET/food-establishment-data.csv'.
     :param output_uri: The URI where output is written, such as 's3://DOC-EXAMPLE-BUCKET/restaurant_violation_results'.
     """
@@ -144,4 +150,4 @@ def getDriverSummary(driverID, startDate, endDate, data_source=DEFAULT_DATA_SOUR
         return json_data
 
 if __name__ == "__main__":
-    application.run(port=5000, debug=True)
+    application.run(port=5000, debug=debugMode)
