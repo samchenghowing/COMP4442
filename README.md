@@ -7,12 +7,16 @@
 ```
 python3 -m venv .venv
 source .venv/bin/activate
+
+# in windows environment, use below
+python3 -m venv .venv
+source .venv/Scripts/activate
 ```
 
 ### Install the dependencies
 
 ```
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 ### run the app
