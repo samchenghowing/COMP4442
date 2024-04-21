@@ -17,8 +17,6 @@
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "vue": "^3.2.13",
-    "vue-recaptcha": "^3.0.0-alpha.4",
-    "vue-recaptcha-v3": "^2.0.1",
     "vue-router": "^4.0.3",
     "vue-sessionstorage": "^1.0.0",
     "vuetify": "^3.5.11",

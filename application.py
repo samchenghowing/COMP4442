@@ -1,44 +1,14 @@
 from flask import Flask, request, jsonify, render_template
 import csv, json, os
-import mysql.connector
 import datetime, time 
 
-# to be moved to driver_summary.py
-# #############
-# https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-gs.html
-import argparse
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import *
-from pyspark.sql.types import *
-debugMode = True
+debugMode = False
 if debugMode:
     DEFAULT_DATA_SOURCE = "./detail-records"
     DEFAULT_OUTPUT_URL  = "./result/csv"
 else:
-    DEFAULT_DATA_SOURCE = "s3://comp4442project2024spring/detail-records"
-    DEFAULT_OUTPUT_URL  = "s3://comp4442project2024spring/result/csv"
-schema = StructType() \
-      .add("driverID",StringType(),True) \
-      .add("carPlateNumber",StringType(),True) \
-      .add("Latitude",DoubleType(),True) \
-      .add("Longtitude",DoubleType(),True) \
-      .add("Speed",IntegerType(),True) \
-      .add("Direction",IntegerType(),True) \
-      .add("siteName",StringType(),True) \
-      .add("Time",DateType(),True) \
-      .add("isRapidlySpeedup",IntegerType(),True) \
-      .add("isRapidlySlowdown",IntegerType(),True) \
-      .add("isNeutralSlide",IntegerType(),True) \
-      .add("isNeutralSlideFinished",IntegerType(),True) \
-      .add("neutralSlideTime",IntegerType(),True) \
-      .add("isOverspeed",IntegerType(),True) \
-      .add("isOverspeedFinished",IntegerType(),True) \
-      .add("overspeedTime",IntegerType(),True) \
-      .add("isFatigueDriving",IntegerType(),True) \
-      .add("isHthrottleStop",IntegerType(),True) \
-      .add("isOilLeak",IntegerType(),True)
-# #############
-# end to be moved to driver_summary.py
+    DEFAULT_DATA_SOURCE = "s3://comp4442sparkapp/detail-records"
+    DEFAULT_OUTPUT_URL  = "s3://comp4442sparkapp/result/csv"
 
 application = Flask(__name__)
 
@@ -53,7 +23,8 @@ def getDriverSummary():
     for root,dirs,files in os.walk(DEFAULT_OUTPUT_URL):
         for file in files:
             if file.endswith(".csv"):
-                csv_file = csv.DictReader(open(file, 'r'))
+                csv_path = os.path.join(DEFAULT_OUTPUT_URL, file)
+                csv_file = csv.DictReader(open(csv_path, 'r', encoding="utf8"))
 
     # Created a list and adds the rows to the list
     json_list = []
@@ -90,4 +61,4 @@ def getdata():
 	# return json.dumps(datas)
 
 if __name__ == "__main__":
-    application.run(port=5000, debug=debugMode, CORS_HEADERS='Content-Type')
+    application.run(port=5000, debug=True)

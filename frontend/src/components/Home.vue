@@ -1,11 +1,11 @@
 <template>
   <div>
-    <h2 class="display-2 font-weight-bold mb-3">Chat Now!</h2>
-    <h1>Welcome to my chat website!</h1>
-    <p>Here you can chat with your classmates in real-time.</p>
-    <router-link to="/login">Log In</router-link>
+    <h2 class="display-2 font-weight-bold mb-3">COMP4442 Project</h2>
+    <h1>Driving behavior analysis with AWS</h1>
+    <p>Here you can monitor driving behavior in easily.</p>
+    <router-link to="/drivingSummary">Driving summary</router-link>
     <p></p>
-    <router-link to="/signup">Sign Up</router-link>
+    <router-link to="/speedMonitoring">Driving Speed monitoring</router-link>
   </div>
 </template>
 

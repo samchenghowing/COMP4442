@@ -7,7 +7,7 @@
         >
         <v-app-bar-nav-icon v-on:click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
-        <v-app-bar-title>My chat</v-app-bar-title>
+        <v-app-bar-title>Driving behavior</v-app-bar-title>
 
         <template v-slot:append>
             <v-btn icon="mdi-dots-vertical" v-on:click="showSetting"></v-btn>
@@ -18,42 +18,15 @@
             v-model="drawer"
             temporary
         >
-            <v-list-item
-                prepend-icon="mdi-account"
-                :title="UserName"
-            ></v-list-item>
-            <v-divider></v-divider>
-
             <v-list density="compact" nav>
-                <div v-if=isLoggedIn>
-                    <v-list-item prepend-icon="mdi-account-box" title="Account" v-on:click="isLoggedIn? $router.push('/account'):dialog=true"></v-list-item>
-                    <v-list-item prepend-icon="mdi-chat" title="Chat" v-on:click="isLoggedIn? $router.push('/chatPage'):dialog=true"></v-list-item>
-                    <v-list-item prepend-icon="mdi-logout" title="Logout" v-on:click="logout"></v-list-item>
-                </div>
-                <div v-else>
-                    <v-list-item prepend-icon="mdi-account" title="Sign Up" v-on:click="$router.push('/signup')"></v-list-item>
-                    <v-list-item prepend-icon="mdi-login" title="Login" v-on:click="$router.push('/login')"></v-list-item>
-                </div>
+                <v-list-item prepend-icon="mdi-home" title="Home" v-on:click="$router.push('/')"></v-list-item>
+                <v-list-item prepend-icon="mdi-form-select" title="Driving summary" v-on:click="$router.push('/drivingSummary')"></v-list-item>
+                <v-list-item prepend-icon="mdi-vector-curve" title="Speed monitoring" v-on:click="$router.push('/speedMonitoring')"></v-list-item>
             </v-list>
         </v-navigation-drawer>
-
-        <div class="text-center">
-            <v-dialog
-            v-model="dialog"
-            width="auto"
-            >
-            <v-card>
-                <v-card-text>
-                You must login to use this function.
-                </v-card-text>
-                <v-card-actions>
-                <v-btn color="primary" block @click="dialog = false">Close Dialog</v-btn>
-                </v-card-actions>
-            </v-card>
-            </v-dialog>
-        </div>
-
     </v-layout>
+    
+    <v-divider></v-divider>
     </v-card>
 </template>
 

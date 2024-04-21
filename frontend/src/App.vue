@@ -4,9 +4,9 @@
   <div id="nav">
     <Header />
     <router-link to="/">Home</router-link> |
-    <router-link to="/account">Account</router-link>
+    <router-link to="/drivingSummary">Driving summary</router-link>
     <p></p>
-    <router-link to="/chatPage">Chat</router-link>
+    <router-link to="/speedMonitoring">Driving Speed monitoring</router-link>
     <router-view/>
   </div>
 </template>

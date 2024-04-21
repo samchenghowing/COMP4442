@@ -87,23 +87,74 @@
         </v-card>
       </v-dialog>
     </v-row>
+
+    
+    <v-card
+      class="mx-auto text-center"
+      color="green"
+      max-width="600"
+      dark
+    >
+      <v-card-text>
+        <div class="text-h4 font-weight-thin">
+          Driving speed of driver A  
+        </div>
+      </v-card-text>
+      <v-card-text>
+        <v-sheet color="rgba(0, 0, 0, .12)">
+          <v-sparkline
+            :model-value="value"
+            color="rgba(255, 255, 255, .7)"
+            height="100"
+            padding="24"
+            stroke-linecap="round"
+            smooth
+          >
+            <template v-slot:label="item">
+              {{ item.value }}
+            </template>
+          </v-sparkline>
+        </v-sheet>
+      </v-card-text>
+
+      <v-card-text>
+        <div class="text-h5 font-weight-thin">
+          From 01-10-2017 to {{  }} 01-10-2017
+        </div>
+      </v-card-text>
+
+    </v-card>
+
   </v-form>
 </template>
 
 <script>
 import io from "socket.io-client";
+import { VSparkline } from 'vuetify/labs/VSparkline'
 
 export default {
-  name: "ChatPage",
+  components: {
+    VSparkline,
+  },
+  name: "SpeedMonitoring",
   data() {
     return {
       user: "",
       messages: [],
       messageText: "",
-      dialog: true,
+      dialog: false,
       items: [1, 2, 3],
       chatRoom: 1,
       socket: io(process.env.VUE_APP_CHAT_URL),
+      value: [
+          423,
+          446,
+          675,
+          510,
+          590,
+          610,
+          760,
+        ],
     };
   },
   created() {
