@@ -1,10 +1,12 @@
+# https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-gs.html
+
 import argparse
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
-debugMode = True
+debugMode = False
 if debugMode:
     DEFAULT_DATA_SOURCE = "./detail-records"
     DEFAULT_OUTPUT_URL  = "./result/csv"
@@ -33,16 +35,13 @@ schema = StructType() \
       .add("isHthrottleStop",IntegerType(),True) \
       .add("isOilLeak",IntegerType(),True)
 
-def getDriverSummary(driverID, startDate, endDate, data_source=DEFAULT_DATA_SOURCE, output_uri=DEFAULT_OUTPUT_URL):
+def getDriverSummary(data_source=DEFAULT_DATA_SOURCE, output_uri=DEFAULT_OUTPUT_URL):
     """
     a) Generate a summary to show the driving behavior of each driver. 
     You are required to display the driving behavior information during the given period in a HTML table.
     The information includes but not limited to the car plate number, the cumulative 
     number of times of overspeed and fatigue driving, the total time of overspeed and neutral slide.
 
-    :param driverID: The requested ID of the driver
-    :param startDate: The given start date driving period
-    :param endDate: The given end date driving period
     :param data_source: The URI of your food establishment data CSV, such as 's3://DOC-EXAMPLE-BUCKET/food-establishment-data.csv'.
     :param output_uri: The URI where output is written, such as 's3://DOC-EXAMPLE-BUCKET/restaurant_violation_results'.
     """
@@ -53,85 +52,21 @@ def getDriverSummary(driverID, startDate, endDate, data_source=DEFAULT_DATA_SOUR
                         .schema(schema) \
                         .load(data_source)
 
-        df.write.format("jdbc") \
-                .option("url", "jdbc:<database_url>") \
-                .option("dbtable", "<table_name>") \
-                .option("user", "<username>") \
-                .option("password", "<password>") \
-                .save()
-
         # Create an in-memory DataFrame to query
         df.createOrReplaceTempView("driver_summary")
 
-        # get carPlateNumber
-        carPlateNumber_result = spark.sql("""
-        SELECT carPlateNumber
+        cumulative_result = spark.sql("""
+            SELECT driverID, carPlateNumber, 
+                SUM(isOverspeed) AS cumulative_overspeed_count,
+                SUM(isFatigueDriving) AS cumulative_fatigue_count,
+                SUM(overspeedTime) AS total_overspeed_time,
+                SUM(neutralSlideTime) AS total_neutral_slide_time,
+                SUM(isHthrottleStop) AS cumulative_hthrottle_stop_count,
+                SUM(isOilLeak) AS cumulative_oil_leak_count
             FROM driver_summary
-            WHERE driverID = {DID}
-        """, DID=driverID)
-        carPlateNumber = carPlateNumber_result.first().carPlateNumber
-
-        # get cumulative number of overspeed
-        cumulative_overspeed_result = spark.sql("""
-        SELECT COUNT(*) AS cumulative_overspeed_count
-            FROM driver_summary
-            WHERE isOverspeed = 1 AND driverID = {DID} AND Time >= {start} AND Time <= {end}
-        """, DID=driverID, start=startDate, end=endDate)
-        cumulative_overspeed_count = cumulative_overspeed_result.first().cumulative_overspeed_count
-
-        # get cumulative number of fatigue driving
-        cumulative_fatigue_result = spark.sql("""
-            SELECT COUNT(*) AS cumulative_fatigue_count
-            FROM driver_summary
-            WHERE isFatigueDriving = 1 AND driverID = {DID} AND Time >= {start} AND Time <= {end}
-        """, DID=driverID, start=startDate, end=endDate)
-        cumulative_fatigue_count = cumulative_fatigue_result.first().cumulative_fatigue_count
-
-        # get total time of overspeed
-        total_overspeed_time_result = spark.sql("""
-            SELECT SUM(overspeedTime) AS total_overspeed_time
-            FROM driver_summary
-            WHERE driverID = {DID} AND Time >= {start} AND Time <= {end}
-        """, DID=driverID, start=startDate, end=endDate)
-        total_overspeed_time = total_overspeed_time_result.first().total_overspeed_time
-
-        # get total time of neutral slide
-        total_neutral_slide_time_result = spark.sql("""
-            SELECT SUM(neutralSlideTime) AS total_neutral_slide_time
-            FROM driver_summary
-            WHERE driverID = {DID} AND Time >= {start} AND Time <= {end}
-        """, DID=driverID, start=startDate, end=endDate)
-        total_neutral_slide_time = total_neutral_slide_time_result.first().total_neutral_slide_time
-
-        # get cumulative number of hthrottle stop
-        cumulative_hthrottle_stop_result = spark.sql("""
-            SELECT COUNT(*) AS cumulative_hthrottle_stop_count
-            FROM driver_summary
-            WHERE isHthrottleStop = 1 AND driverID = {DID} AND Time >= {start} AND Time <= {end}
-        """, DID=driverID, start=startDate, end=endDate)
-        cumulative_hthrottle_stop_count = cumulative_hthrottle_stop_result.first().cumulative_hthrottle_stop_count
-
-        # get cumulative number of oil leak
-        cumulative_oil_leak_result = spark.sql("""
-            SELECT COUNT(*) AS cumulative_oil_leak_count
-            FROM driver_summary
-            WHERE isOilLeak = 1 AND driverID = {DID} AND Time >= {start} AND Time <= {end}
-        """, DID=driverID, start=startDate, end=endDate)
-        cumulative_oil_leak_count = cumulative_oil_leak_result.first().cumulative_oil_leak_count
-
-
-        json_data = {
-            "driverID": driverID,
-            "carPlateNumber": carPlateNumber,
-            "cumulative_overspeed_count": cumulative_overspeed_count,
-            "cumulative_fatigue_count": cumulative_fatigue_count,
-            "total_overspeed_time": total_overspeed_time,
-            "total_neutral_slide_time": total_neutral_slide_time,
-            "cumulative_hthrottle_stop_count": cumulative_hthrottle_stop_count,
-            "cumulative_oil_leak_count": cumulative_oil_leak_count
-        }
-        return json_data
-
+            GROUP BY driverID, carPlateNumber
+        """)
+        cumulative_result.write.option("header", "true").mode("overwrite").csv(output_uri)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
