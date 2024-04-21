@@ -1,22 +1,12 @@
 <template>  
   <div id="nav">
     <v-container>
-      <v-row class="text-center">
-        <div class="text-center ma-2">
-          <v-snackbar
-            v-model="snackbar"
-          >
-            {{ text }}
-          </v-snackbar>
-        </div>
-      </v-row>
 
       <v-data-table :items="items">
         <template v-slot:header.id="{ column }">
           {{ column.title.toUpperCase() }}
         </template>
       </v-data-table>
-
 
     </v-container>
   </div>
@@ -39,13 +29,9 @@ export default {
     })
   },
   data: () => ({
-    snackbar: false,
-    loading: false,
-    text: `Hello, I'm a snackbar`,
     items: [],
   }),
   methods:{
   },
-
 }
 </script>

@@ -1,131 +1,79 @@
 <template>
-  <v-form>
+  <div id="nav">
     <v-container>
-      <v-row>
+
+      <!-- <v-row>
         <v-col>
-          <h1>
-            Chat Room {{chatRoom}}          
-            <v-btn
-              @click="leftRoom"
+          <v-timeline align="start" density="compact">
+            <v-timeline-item
+              v-for="message in messages"
+              :key="message.time"
+              :dot-color="message.color"
+              size="x-small"
             >
-              Change chat room
-            </v-btn>
-          </h1>
-
-          <div v-if="messages.length === 0">
-            <h2>No messages yet... be the one to start!</h2>
-          </div>
-          <div v-else>
-            <v-timeline align="start" density="compact">
-              <v-timeline-item
-                v-for="message in messages"
-                :key="message.time"
-                :dot-color="message.color"
-                size="x-small"
-              >
-                <div class="mb-4">
-                  <div class="font-weight-normal">
-                    <strong>{{ message.name }}</strong> @{{ message.time }}
-                  </div>
-                  <div>{{ message.content }}</div>
+              <div class="mb-4">
+                <div class="font-weight-normal">
+                  <strong>{{ message.name }}</strong> @{{ message.time }}
                 </div>
-              </v-timeline-item>
-            </v-timeline>
-          </div>
+                <div>{{ message.content }}</div>
+              </div>
+            </v-timeline-item>
+          </v-timeline>
+        </v-col>
+      </v-row> -->
+      
+      <v-row dense>
+        <v-col v-for="(card, i) in cards" :key="i" cols="12" md="4">
+          <v-card elevation="4">
+            <div class="pa-4">
+              <div class="ps-4 text-caption text-medium-emphasis">{{ card.title }}</div>
 
-          <v-text-field
-            v-model="messageText"
-            clearable
-            label="Message"
-            type="text"
-            variant="outlined"
-          >
-            <template v-slot:append>
-              <v-menu>
-                <template v-slot:activator="{ props }">
-                  <v-btn v-bind="props" class="mt-n2" @click="sendMessage">
-                    Send
-                    <v-icon icon="mdi-send" end></v-icon>
-                  </v-btn>
-                </template>
-              </v-menu>
-            </template>
-          </v-text-field>
+              <v-card-title class="pt-0 mt-n1 d-flex align-center">
+                <div class="me-2">{{ card.value }}</div>
+
+                <v-chip
+                  :color="card.color"
+                  :prepend-icon="`mdi-arrow-${card.change.startsWith('-') ? 'down' : 'up'}`"
+                  class="pe-1"
+                  size="x-small"
+                  label
+                >
+                  <template v-slot:prepend>
+                    <v-icon size="10"></v-icon>
+                  </template>
+
+                  <span class="text-caption">{{ card.change }}</span>
+                </v-chip>
+              </v-card-title>
+            </div>
+
+            <v-sparkline
+              :color="card.color"
+              :gradient="[`${card.color}E6`, `${card.color}33`, `${card.color}00`]"
+              :model-value="card.data"
+              height="50"
+              line-width="1"
+              min="0"
+              padding="0"
+              fill
+              smooth
+            ></v-sparkline>
+          </v-card>
         </v-col>
       </v-row>
+
+      <v-row class="text-center">
+        <div class="text-center ma-2">
+          <v-snackbar
+            v-model="snackbar"
+          >
+            {{ text }}
+          </v-snackbar>
+        </div>
+      </v-row>
+
     </v-container>
-        
-    <v-row justify="center">
-      <v-dialog
-        v-model="dialog"
-        persistent
-        width="auto"
-      >
-        <v-card>
-          <v-card-title class="text-h5">
-            Chatrooms
-          </v-card-title>
-          <v-card-text>Choose a chatroom to start chatting</v-card-text>
-
-          <v-combobox
-            v-model="chatRoom"
-            label="chatRoom"
-            :items="items"
-          >
-          </v-combobox>
-
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              v-model="confirmButton"
-              :disabled="!items.length"
-              @click="joinRoom"
-            >
-              Confirm
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-row>
-
-    
-    <v-card
-      class="mx-auto text-center"
-      color="green"
-      max-width="600"
-      dark
-    >
-      <v-card-text>
-        <div class="text-h4 font-weight-thin">
-          Driving speed of driver A  
-        </div>
-      </v-card-text>
-      <v-card-text>
-        <v-sheet color="rgba(0, 0, 0, .12)">
-          <v-sparkline
-            :model-value="value"
-            color="rgba(255, 255, 255, .7)"
-            height="100"
-            padding="24"
-            stroke-linecap="round"
-            smooth
-          >
-            <template v-slot:label="item">
-              {{ item.value }}
-            </template>
-          </v-sparkline>
-        </v-sheet>
-      </v-card-text>
-
-      <v-card-text>
-        <div class="text-h5 font-weight-thin">
-          From 01-10-2017 to {{  }} 01-10-2017
-        </div>
-      </v-card-text>
-
-    </v-card>
-
-  </v-form>
+  </div>
 </template>
 
 <script>
@@ -133,28 +81,26 @@ import io from "socket.io-client";
 import { VSparkline } from 'vuetify/labs/VSparkline'
 
 export default {
+  name: "SpeedMonitoring",
   components: {
     VSparkline,
   },
-  name: "SpeedMonitoring",
   data() {
     return {
       user: "",
       messages: [],
-      messageText: "",
-      dialog: false,
-      items: [1, 2, 3],
+
+      snackbar: false,
+      text: `Hello, I'm a snackbar`,
+
+
+      bandwidth: [5, 2, 5, 9, 5, 10, 3, 5, 3, 7, 1, 8, 2, 9, 6],
+      requests: [1, 3, 8, 2, 9, 5, 10, 3, 5, 3, 7, 6, 8, 2, 9, 6],
+      cache: [9, 9, 9, 9, 8.9, 9, 9, 9, 9, 9],
+
+
       chatRoom: 1,
-      socket: io(process.env.VUE_APP_CHAT_URL),
-      value: [
-          423,
-          446,
-          675,
-          510,
-          590,
-          610,
-          760,
-        ],
+      socket: io(process.env.VUE_APP_API_URL),
     };
   },
   created() {
@@ -163,9 +109,33 @@ export default {
       var obj = JSON.parse(message)
       this.messages.push(obj)
     })
-
-    // TO-DO
-    // this.socket.on('status', (data) => {})
+  },
+  computed: {
+    cards () {
+      return [
+        {
+          title: 'Bandwidth Used',
+          value: '1.01 TB',
+          change: '-20.12%',
+          color: '#da5656',
+          data: this.bandwidth,
+        },
+        {
+          title: 'Requests Served',
+          value: '7.96 M',
+          change: '-7.73%',
+          color: '#da5656',
+          data: this.requests,
+        },
+        {
+          title: 'Cache Hit Rate',
+          value: '95.69 %',
+          change: '0.75%',
+          color: '#2fc584',
+          data: this.cache,
+        },
+      ]
+    },
   },
   methods: {
     joinRoom(){
@@ -185,50 +155,6 @@ export default {
           time: currentDate,
         })
       })
-      this.dialog = false
-    },
-
-    leftRoom(){
-      var obj = JSON.parse(sessionStorage.user)
-      var name = obj["User info"]["name"]
-      var userID = obj["User info"]["id"]
-      var pwHash = obj["User info"]["pwHash"]
-      var currentDate = new Date()
-
-      // left current room first
-      this.socket.emit('left', {
-        msg: JSON.stringify({ 
-          room: this.chatRoom,
-          userID: userID,
-          name: name,
-          pwHash: pwHash,
-          content: "joined",
-          time: currentDate,
-        })
-      })
-      this.dialog = true
-    },
-
-    sendMessage() {
-      if (this.messageText.trim() === "") {
-        return;
-      }
-      var obj = JSON.parse(sessionStorage.user)
-      var name = obj["User info"]["name"]
-      var userID = obj["User info"]["id"]
-      var pwHash = obj["User info"]["pwHash"]
-      var currentDate = new Date()
-
-      this.socket.emit('text', {
-        msg: JSON.stringify({ 
-          room: this.chatRoom,
-          userID: userID,
-          name: name,
-          pwHash: pwHash,
-          content: this.messageText,
-          time: currentDate,
-        })
-      });
     },
   },
 };
