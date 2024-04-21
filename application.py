@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
+
 import csv, json, os
 import datetime, time 
 
-debugMode = False
+debugMode = True
 if debugMode:
     DEFAULT_DATA_SOURCE = "./detail-records"
     DEFAULT_OUTPUT_URL  = "./result/csv"
@@ -11,6 +13,7 @@ else:
     DEFAULT_OUTPUT_URL  = "s3://comp4442sparkapp/result/csv"
 
 application = Flask(__name__)
+CORS(application) # for frontend
 
 @application.route("/")
 def index():
@@ -18,7 +21,7 @@ def index():
             Please access the frontend at this URL: \
             "
 
-@application.route("/getDriverSummary")
+@application.route("/getDriverSummary", methods=['POST', 'GET'])
 def getDriverSummary():
     for root,dirs,files in os.walk(DEFAULT_OUTPUT_URL):
         for file in files:
