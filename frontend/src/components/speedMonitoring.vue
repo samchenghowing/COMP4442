@@ -98,6 +98,10 @@ export default {
       requests: [1, 3, 8, 2, 9, 5, 10, 3, 5, 3, 7, 6, 8, 2, 9, 6],
       cache: [9, 9, 9, 9, 8.9, 9, 9, 9, 9, 9],
 
+      
+      startTime: "2017-01-01 00:00:00",
+      endTime: "0",
+
 
       chatRoom: 1,
       socket: io(process.env.VUE_APP_API_URL),
@@ -156,6 +160,21 @@ export default {
         })
       })
     },
+    getDriverSpeed(){
+      var drivingSummaryAPI = process.env.VUE_APP_API_URL + "/getDriverSpeed"        
+      fetch(drivingSummaryAPI, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          startTime: this.startTime,
+          endTime: this.endTime,
+        })
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        this.items = data
+      })
+    }
   },
 };
 </script>

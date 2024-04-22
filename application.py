@@ -36,32 +36,25 @@ def getDriverSummary():
 
     return json.dumps(json_list), 200
 
-tmp_time = 0
-@application.route("/data")
-def getdata():
+@application.route("/getDriverSpeed")
+def getDriverSpeed():
     json_data = request.get_json()
-    time = json_data['time']
+    startTime = json_data['startTime']
+    endTime = json_data['endTime']
 
-	# global tmp_time
-	# if tmp_time > 0 :
-	# 	sql = "select ctime,num from Monitor where ctime >%s" %(tmp_time)
-	# else:
-    #     s = "01/01/2017"
-    #     tmp_time = time.mktime(datetime.datetime.strptime(s, "%d/%m/%Y").timetuple())
-	# 	sql = "select ctime,num from Monitor"
-
+    # return every driver's speed and isOverspeed at the time period
+    # Use spark in beanstalk??
+    
+	# sql = "select ctime,num from Monitor"
 	# cur.execute(sql)
-    tmp_time = json_data['endDate']
-    return jsonify(json_data), 200
-
 	# datas = []
 	# for i in cur.fetchall():
 	# 	datas.append([i[0], i[1]])
-
 	# if len(datas) > 0 :
 	# 	tmp_time = datas[-1][0]
-
 	# return json.dumps(datas)
+ 
+    return jsonify(json_data), 200
 
 if __name__ == "__main__":
     application.run(port=5000, debug=True)
