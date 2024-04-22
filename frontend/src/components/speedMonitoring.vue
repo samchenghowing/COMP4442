@@ -161,7 +161,7 @@ export default {
       })
     },
     getDriverSpeed(){
-      var drivingSummaryAPI = process.env.VUE_APP_API_URL + "/getDriverSpeed"        
+      var drivingSummaryAPI = "https://t4yyr2qvygeswyc452x4j2zg7a0qlgvd.lambda-url.us-east-1.on.aws/"        
       fetch(drivingSummaryAPI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
