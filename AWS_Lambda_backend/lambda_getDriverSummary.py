@@ -1,5 +1,5 @@
 import boto3
-import csv, json, io
+import csv, json
 
 bucket = 'comp4442sparkapp'
 
