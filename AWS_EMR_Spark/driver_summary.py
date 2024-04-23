@@ -14,7 +14,7 @@ schema = StructType() \
       .add("Speed",IntegerType(),True) \
       .add("Direction",IntegerType(),True) \
       .add("siteName",StringType(),True) \
-      .add("Time",TimestampType(),True) \
+      .add("Time",TimestampNTZType(),True) \
       .add("isRapidlySpeedup",IntegerType(),True) \
       .add("isRapidlySlowdown",IntegerType(),True) \
       .add("isNeutralSlide",IntegerType(),True) \

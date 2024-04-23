@@ -1,35 +1,30 @@
 import boto3
-import csv, json
+import json
 
-bucket = 'comp4442sparkapp'
+def respond(err, res=None):
+    return {
+        'statusCode': '400' if err else '200',
+        'body': err.message if err else json.dumps(res),
+        'headers': {
+            'Content-Type': 'application/json',
+        },
+    }
 
 def lambda_handler(event, context):
     
-    try:
-        s3 = boto3.resource('s3')
-        my_bucket = s3.Bucket(bucket)
-        prefix_objs = my_bucket.objects.filter(Prefix="results/csv")
-        
-        prefix_df = []
+    dynamo = boto3.client('dynamodb')
     
-        for obj in prefix_objs:
-            key = obj.key
-            if key.endswith(".csv"):
-                lines = str(obj.get()['Body'].read().decode('utf-8')).split()
-                for row in csv.DictReader(lines):
-                    prefix_df.append(row)
-                    
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-            },
-            'body': json.dumps(prefix_df)
-        }
-        
-    except Exception as e:
-        print(e)
-        print('Error getting object from bucket {}. Make sure they exist and your bucket is in the same region as this function.'.format(bucket))
-        raise e
+    query_params = {
+        'TableName': 'driver_speed',
+        'KeyConditionExpression': 'driverID = :pk_value AND speed_time BETWEEN :sk_value1 AND :sk_value2',
+        'ExpressionAttributeValues': {
+            ':pk_value': {'S': 'zouan1000007'},
+            ':sk_value1': {'S': '2017-01-01T08:00:10.000'},
+            ':sk_value2': {'S': '2017-01-01T08:02:30.000'}
+        },
+        'Limit': 10  # Limit the result to 10 items
+    }
+    
+    # Query the table
+    response = dynamo.query(**query_params)
+    return respond(None, response)

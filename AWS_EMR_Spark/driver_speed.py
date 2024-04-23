@@ -14,7 +14,7 @@ schema = StructType() \
       .add("Speed",IntegerType(),True) \
       .add("Direction",IntegerType(),True) \
       .add("siteName",StringType(),True) \
-      .add("Time",TimestampType(),True) \
+      .add("Time",TimestampNTZType(),True) \
       .add("isRapidlySpeedup",IntegerType(),True) \
       .add("isRapidlySlowdown",IntegerType(),True) \
       .add("isNeutralSlide",IntegerType(),True) \
@@ -48,7 +48,7 @@ def getDriverSpeed(data_source, output_uri, start_time, end_time):
 
         cumulative_result = spark.sql("""
             SELECT driverID, carPlateNumber, 
-                isOverspeed, Speed, Time
+                isOverspeed, Speed, Time AS speed_time
             FROM driver_speed
             WHERE Time >= {start} AND Time <= {end}
         """, start=start_time, end=end_time)
