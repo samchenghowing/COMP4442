@@ -1,0 +1,6 @@
+Flask==2.2.5
+Flask-Cors==3.0.10
+Flask-SocketIO==5.1.1
+Flask-WTF==1.0.0
+Werkzeug==2.3.4
+pyspark==3.5.1

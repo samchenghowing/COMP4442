@@ -49,7 +49,7 @@ def getDriverSpeed(data_source, output_uri, start_time, end_time):
         cumulative_result = spark.sql("""
             SELECT driverID, carPlateNumber, 
                 isOverspeed, Speed, Time
-            FROM driver_summary
+            FROM driver_speed
             WHERE Time >= {start} AND Time <= {end}
         """, start=start_time, end=end_time)
 
@@ -67,4 +67,4 @@ if __name__ == "__main__":
         '--end_time', help="The end time requsted, like '2017-01-07 00:00:00'.")
     args = parser.parse_args()
 
-    getDriverSpeed(args.data_source, args.output_uri)
+    getDriverSpeed(args.data_source, args.output_uri, args.start_time, args.end_time)

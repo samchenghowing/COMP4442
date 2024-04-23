@@ -22,5 +22,5 @@ pip3 install -r requirements.txt
 ### run the app
 
 ```
-flask run
+python3 application.py
 ```
