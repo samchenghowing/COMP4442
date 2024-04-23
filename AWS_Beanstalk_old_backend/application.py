@@ -2,15 +2,17 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
 import csv, json, os
-import datetime, time 
+import datetime, time
 
-debugMode = True
+import boto3
+
+debugMode = False
 if debugMode:
     DEFAULT_DATA_SOURCE = "./detail-records"
     DEFAULT_OUTPUT_URL  = "./result/csv"
 else:
     DEFAULT_DATA_SOURCE = "s3://comp4442sparkapp/detail-records"
-    DEFAULT_OUTPUT_URL  = "s3://comp4442sparkapp/result/csv"
+    DEFAULT_OUTPUT_URL  = "s3://comp4442sparkapp/results/csv"
 
 application = Flask(__name__)
 CORS(application) # for frontend

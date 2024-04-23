@@ -3,3 +3,4 @@ Flask-Cors==3.0.10
 Flask-SocketIO==5.1.1
 Flask-WTF==1.0.0
 Werkzeug==2.3.4
+boto3==1.34.88
