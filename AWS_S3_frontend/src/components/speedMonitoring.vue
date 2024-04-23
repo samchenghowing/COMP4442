@@ -1,7 +1,7 @@
 <template>
-  <div class="text-center">
+  <div id="displayGroup">
 
-    <v-timeline side="end">
+    <!-- <v-timeline side="end">
       <v-timeline-item
         v-for="item in items"
         :key="item.id"
@@ -16,7 +16,7 @@
           Lorem ipsum dolor sit amet, no nam oblique veritus. Commune scaevola imperdiet nec ut, sed euismod convenire principes at. Est et nobis iisque percipit, an vim zril disputando voluptatibus, vix an salutandi sententiae.
         </v-alert>
       </v-timeline-item>
-    </v-timeline>
+    </v-timeline> -->
 
     <v-row dense>
       <v-col v-for="(card, i) in cards" :key="i" cols="12" md="4">
@@ -68,10 +68,16 @@ export default {
   components: {
     VSparkline,
   },
-  created() {
+  mounted() {
+    // get update every 30 seconds
+    this.timer = setInterval(() => {
+      this.getDriverSpeed()
+    }, 30000)
   },
   data() {
     return {
+      timer: null,
+
       bandwidth: [5, 2, 5, 9, 5, 10, 3, 5, 3, 7, 1, 8, 2, 9, 6],
       requests: [1, 3, 8, 2, 9, 5, 10, 3, 5, 3, 7, 6, 8, 2, 9, 6],
       cache: [9, 9, 9, 9, 8.9, 9, 9, 9, 9, 9],
@@ -123,7 +129,7 @@ export default {
   },
   methods: {
     getDriverSpeed(){
-      var drivingSummaryAPI = "https://t4yyr2qvygeswyc452x4j2zg7a0qlgvd.lambda-url.us-east-1.on.aws/"        
+      var drivingSummaryAPI = process.env.VUE_APP_API_URL + "/getDriverSpeed"        
       fetch(drivingSummaryAPI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -138,5 +144,8 @@ export default {
       })
     }
   },
+  beforeDestroy() {
+    clearInterval(this.timer)
+  }
 };
 </script>

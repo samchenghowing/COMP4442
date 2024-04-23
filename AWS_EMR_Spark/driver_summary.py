@@ -6,9 +6,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
-DEFAULT_DATA_SOURCE = "./detail-records"
-DEFAULT_OUTPUT_URL  = "./result/csv"
-
 schema = StructType() \
       .add("driverID",StringType(),True) \
       .add("carPlateNumber",StringType(),True) \
@@ -30,7 +27,7 @@ schema = StructType() \
       .add("isHthrottleStop",IntegerType(),True) \
       .add("isOilLeak",IntegerType(),True)
 
-def getDriverSummary(data_source=DEFAULT_DATA_SOURCE, output_uri=DEFAULT_OUTPUT_URL):
+def getDriverSummary(data_source, output_uri):
     """
     a) Generate a summary to show the driving behavior of each driver. 
     You are required to display the driving behavior information during the given period in a HTML table.

@@ -54,7 +54,7 @@ export default {
   }),
   methods:{
     getDriverSummary(){
-      var drivingSummaryAPI = "https://fomtda4hpxzbuzobcyhvk26fcu0ofqnc.lambda-url.us-east-1.on.aws/"        
+      var drivingSummaryAPI = process.env.VUE_APP_API_URL + "/getDriverSummary"           
       fetch(drivingSummaryAPI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
