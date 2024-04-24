@@ -6,16 +6,27 @@ driver_list = ['zouan1000007', 'duxu1000009', 'hanhui1000002', 'panxian1000005',
 
 def lambda_handler(event, context):
     
-    # Sample test request
-    #
-    # POST https://esn76s0sj6.execute-api.us-east-1.amazonaws.com/getDriverSpeed
-    # Content-Type: application/json
+    http_method = event['requestContext']['http']['method']
     
-    # {"startTime": "2017-01-01T08:00:10.000", "endTime": "2017-01-01T08:02:10.000"}
-    
-    body = json.loads(event['body'])
-    startTime = body['startTime']
-    endTime = body['endTime']
+    if http_method == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            'body': ''
+        }
+    elif http_method == 'GET':
+        query_params = event['queryStringParameters']
+        startTime = query_params['startTime']
+        endTime = query_params['endTime']
+
+    elif http_method == 'POST':
+        body = json.loads(event['body'])
+        startTime = body['startTime']
+        endTime = body['endTime']
     
     dynamo = boto3.client('dynamodb')
     

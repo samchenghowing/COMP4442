@@ -5,6 +5,19 @@ bucket = 'comp4442sparkapp'
 
 def lambda_handler(event, context):
     
+    http_method = event['requestContext']['http']['method']
+    
+    if http_method == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            'body': ''
+        }
+    
     try:
         s3 = boto3.resource('s3')
         my_bucket = s3.Bucket(bucket)
