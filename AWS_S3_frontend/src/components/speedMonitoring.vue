@@ -58,6 +58,39 @@
       </v-col>
     </v-row>
 
+    <v-dialog
+      v-model="dialog"
+      max-width="400"
+      persistent
+    >
+      <v-list
+        class="py-2"
+        color="primary"
+        elevation="12"
+        rounded="lg"
+      >
+        <v-list-item
+          prepend-icon="mdi-aws"
+          title="Retriving data from Lambda function..."
+        >
+          <template v-slot:prepend>
+            <div class="pe-4">
+              <v-icon color="primary" size="x-large"></v-icon>
+            </div>
+          </template>
+
+          <template v-slot:append>
+            <v-progress-circular
+              color="primary"
+              indeterminate="disable-shrink"
+              size="16"
+              width="2"
+            ></v-progress-circular>
+          </template>
+        </v-list-item>
+      </v-list>
+    </v-dialog>
+
   </div>
 </template>
 
@@ -67,6 +100,9 @@ import { VSparkline } from 'vuetify/labs/VSparkline'
 export default {
   components: {
     VSparkline,
+  },
+  created() {
+    this.getDriverSpeed()
   },
   mounted() {
     // get update every 30 seconds
@@ -78,12 +114,14 @@ export default {
     return {
       timer: null,
 
+      dialog: true,
+
       bandwidth: [5, 2, 5, 9, 5, 10, 3, 5, 3, 7, 1, 8, 2, 9, 6],
       requests: [1, 3, 8, 2, 9, 5, 10, 3, 5, 3, 7, 6, 8, 2, 9, 6],
       cache: [9, 9, 9, 9, 8.9, 9, 9, 9, 9, 9],
 
-      startTime: "2017-01-01 00:00:00",
-      endTime: "0",
+      startTime: '2017-01-01T08:00:10.000',
+      endTime: '2017-01-01T08:01:30.000',
 
       items: [
         {
@@ -133,14 +171,16 @@ export default {
       fetch(drivingSummaryAPI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          startTime: this.startTime,
-          endTime: this.endTime,
+        body: JSON.stringify({
+          startTime: '2017-01-01T08:00:10.000',
+          endTime: '2017-01-01T08:01:30.000',
         })
       })
       .then((response) => response.json())
       .then((data) => {
         this.items = data
+        console.log(data)
+        this.dialog = false
       })
     }
   },
