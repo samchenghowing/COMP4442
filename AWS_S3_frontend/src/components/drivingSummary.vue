@@ -56,11 +56,8 @@ export default {
     getDriverSummary(){
       var drivingSummaryAPI = process.env.VUE_APP_API_URL + "/getDriverSummary"           
       fetch(drivingSummaryAPI, {
-        method: "POST",
+        method: "GET",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          // name: this.userName,
-        })
       })
       .then((response) => response.json())
       .then((data) => {

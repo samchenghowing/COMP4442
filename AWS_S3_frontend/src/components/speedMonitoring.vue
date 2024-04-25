@@ -1,63 +1,76 @@
 <template>
   <div id="displayGroup">
 
-    <!-- <v-timeline side="end">
-      <v-timeline-item
-        v-for="item in items"
-        :key="item.id"
-        :dot-color="item.color"
-        size="small"
+    <h2> Speed monitoring for current period:</h2>
+    <h1>{{startTime}} to {{endTime}}</h1>
+    <h3>Next update will be: {{ timerCount }} seconds</h3>
+   
+    <div class="text-center" >
+      <v-dialog
+        width="auto"
+        scrollable
+        v-model="alertDialog"
       >
-        <v-alert
-          :color="item.color"
-          :icon="item.icon"
-          :value="true"
+      <v-card
+        prepend-icon="mdi-alert"
+        title="Speeding Alert"
         >
-          Lorem ipsum dolor sit amet, no nam oblique veritus. Commune scaevola imperdiet nec ut, sed euismod convenire principes at. Est et nobis iisque percipit, an vim zril disputando voluptatibus, vix an salutandi sententiae.
-        </v-alert>
-      </v-timeline-item>
-    </v-timeline> -->
+          <v-divider class="mt-3"></v-divider>
+          <v-card-text class="px-4" style="height: 300px;">
+            <v-alert
+              density="compact"
+              title="Speeding drivers (scoll down for more)"
+              type="warning"
+            >
+              <v-timeline align="start" density="compact">
+                <v-timeline-item
+                  v-for="overspeedDriver in overspeedDrivers"
+                  :key="overspeedDriver.speed_time"
+                  size="x-small"
+                >
+                  <div class="mb-4">
+                    <div class="font-weight-normal">
+                      <strong>{{ overspeedDriver.carPlateNumber }}</strong> @{{ overspeedDriver.speed_time }}
+                    </div>
+                    <div>Speed: {{ overspeedDriver.speed }}</div>
+                  </div>
+                </v-timeline-item>
+              </v-timeline>
+            </v-alert>
+          </v-card-text>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-btn
+              text="Close"
+              @click="alertDialog = false"
+            ></v-btn>
+          </v-card-actions>
+      </v-card>
 
-    <v-row dense>
-      <v-col v-for="(card, i) in cards" :key="i" cols="12" md="4">
-        <v-card elevation="4">
-          <div class="pa-4">
-            <div class="ps-4 text-caption text-medium-emphasis">{{ card.title }}</div>
+      </v-dialog>
+    </div>
+    
+    <div v-for="card in cards" :key="card.driverID">
+      <v-card
+        :title=card.driverID
+        :subtitle=card.carPlateNumber
+        class="mt-8 mx-auto overflow-visible"
+        max-width="600"
+      >
+        <v-sparkline
+          :model-value="card.data"
+          :gradient="['#f72047', '#ffd200', '#1feaea']"
+          height="50"
+          line-width="2"
+          min="0"
+          padding="0"
+          smooth="16"
+          auto-draw
+        ></v-sparkline>
+      </v-card>
+    </div>
 
-            <v-card-title class="pt-0 mt-n1 d-flex align-center">
-              <div class="me-2">{{ card.value }}</div>
-
-              <v-chip
-                :color="card.color"
-                :prepend-icon="`mdi-arrow-${card.change.startsWith('-') ? 'down' : 'up'}`"
-                class="pe-1"
-                size="x-small"
-                label
-              >
-                <template v-slot:prepend>
-                  <v-icon size="10"></v-icon>
-                </template>
-
-                <span class="text-caption">{{ card.change }}</span>
-              </v-chip>
-            </v-card-title>
-          </div>
-
-          <v-sparkline
-            :color="card.color"
-            :gradient="[`${card.color}E6`, `${card.color}33`, `${card.color}00`]"
-            :model-value="card.data"
-            height="50"
-            line-width="1"
-            min="0"
-            padding="0"
-            fill
-            smooth
-          ></v-sparkline>
-        </v-card>
-      </v-col>
-    </v-row>
-
+    <!-- show loading -->
     <v-dialog
       v-model="dialog"
       max-width="400"
@@ -104,82 +117,85 @@ export default {
   created() {
     this.getDriverSpeed()
   },
-  mounted() {
-    // get update every 30 seconds
-    this.timer = setInterval(() => {
-      this.getDriverSpeed()
-    }, 30000)
-  },
   data() {
     return {
-      timer: null,
-
-      dialog: true,
-
-      bandwidth: [5, 2, 5, 9, 5, 10, 3, 5, 3, 7, 1, 8, 2, 9, 6],
-      requests: [1, 3, 8, 2, 9, 5, 10, 3, 5, 3, 7, 6, 8, 2, 9, 6],
-      cache: [9, 9, 9, 9, 8.9, 9, 9, 9, 9, 9],
-
-      startTime: '2017-01-01T08:00:10.000',
-      endTime: '2017-01-01T08:01:30.000',
-
-      items: [
-        {
-          id: 1,
-          color: 'info',
-          icon: 'mdi-information',
-        },
-        {
-          id: 2,
-          color: 'error',
-          icon: 'mdi-alert-circle',
-        },
-      ],
-
+      timerCount: 0,
+      dialog: false,
+      alertDialog: false,
+      cards: null,
+      startTime: '2017-01-01T08:00:00.000Z',
+      endTime: '2017-01-01T08:03:00.000Z',
+      overspeedDrivers: [],
     };
   },
-  computed: {
-    cards () {
-      return [
-        {
-          title: 'Bandwidth Used',
-          value: '1.01 TB',
-          change: '-20.12%',
-          color: '#da5656',
-          data: this.bandwidth,
-        },
-        {
-          title: 'Requests Served',
-          value: '7.96 M',
-          change: '-7.73%',
-          color: '#da5656',
-          data: this.requests,
-        },
-        {
-          title: 'Cache Hit Rate',
-          value: '95.69 %',
-          change: '0.75%',
-          color: '#2fc584',
-          data: this.cache,
-        },
-      ]
-    },
+  watch: {
+    timerCount: {
+      handler(value) {
+          if (value > 0) {
+              setTimeout(() => {
+                  this.timerCount--;
+              }, 1000);
+          }
+          if (value == 0) {
+            this.getDriverSpeed()
+          }
+      },
+      immediate: true // This ensures the watcher is triggered upon creation
+    }
   },
   methods: {
     getDriverSpeed(){
+      this.dialog = true
+
+      // convert from ISOString
+      var startDate = new Date(this.startTime);
+      var endDate = new Date(this.endTime);
+
+      // add 30 sec
+      startDate.setSeconds(startDate.getSeconds() + 30);
+      endDate.setSeconds(endDate.getSeconds() + 30);
+
+      // convert to ISOString
+      this.startTime = startDate.toISOString();
+      this.endTime = endDate.toISOString();
+
       var drivingSummaryAPI = process.env.VUE_APP_API_URL + "/getDriverSpeed"        
       fetch(drivingSummaryAPI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          startTime: '2017-01-01T08:00:10.000',
-          endTime: '2017-01-01T08:01:30.000',
+          startTime: this.startTime,
+          endTime: this.endTime,
         })
       })
       .then((response) => response.json())
       .then((data) => {
-        this.items = data
-        console.log(data)
+        var itemsArray = data.flatMap(item => item.Items);
+
+        const result = itemsArray.reduce((acc, item) => {
+          const driverID = item.driverID.S;
+          const carPlateNumber = item.carPlateNumber.S;
+          const speed_time = item.speed_time.S;
+          const speed = parseInt(item.Speed.S, 10);
+          const isOverspeed = item.isOverspeed ? parseInt(item.isOverspeed.S, 10) : 0;
+          if(isOverspeed == 1) this.overspeedDrivers.push({ driverID, carPlateNumber, speed, speed_time });
+
+          const existingDriver = acc.find(driver => driver.driverID === driverID);
+          if (existingDriver) {
+            existingDriver.data.push(speed);
+            existingDriver.isOverspeed = isOverspeed;
+            existingDriver.carPlateNumber = carPlateNumber;
+          } else {
+            acc.push({ driverID, carPlateNumber, data: [speed], isOverspeed});
+          }
+          return acc;
+        }, []);
+
+        if (this.overspeedDrivers.length) this.alertDialog = true;
+        console.log(this.overspeedDrivers);
+
+        this.timerCount = 30
+        this.cards = result
         this.dialog = false
       })
     }
