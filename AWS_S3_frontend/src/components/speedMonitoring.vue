@@ -3,7 +3,7 @@
 
     <h2> Speed monitoring for current period:</h2>
     <h1>{{startTime}} to {{endTime}}</h1>
-    <h3>Next update will be: {{ timerCount }} seconds</h3>
+    <h3>Next update will be in: {{ timerCount }} seconds</h3>
    
     <div class="text-center" >
       <v-dialog
@@ -13,7 +13,7 @@
       >
       <v-card
         prepend-icon="mdi-alert"
-        title="Speeding Alert"
+        title="Speeding Alert for current period"
         >
           <v-divider class="mt-3"></v-divider>
           <v-card-text class="px-4" style="height: 300px;">
@@ -32,7 +32,7 @@
                     <div class="font-weight-normal">
                       <strong>{{ overspeedDriver.carPlateNumber }}</strong> @{{ overspeedDriver.speed_time }}
                     </div>
-                    <div>Speed: {{ overspeedDriver.speed }}</div>
+                    <div>Speed: {{ overspeedDriver.speed }} km/h</div>
                   </div>
                 </v-timeline-item>
               </v-timeline>
@@ -41,8 +41,8 @@
           <v-divider></v-divider>
           <v-card-actions>
             <v-btn
-              text="Close"
-              @click="alertDialog = false"
+              text="Clear alerts"
+              @click="clearAlerts"
             ></v-btn>
           </v-card-actions>
       </v-card>
@@ -57,6 +57,7 @@
         class="mt-8 mx-auto overflow-visible"
         max-width="600"
       >
+      <v-card-title>Latest Speed: {{card.data.at(-1)}} km/h</v-card-title>
         <v-sparkline
           :model-value="card.data"
           :gradient="['#f72047', '#ffd200', '#1feaea']"
@@ -198,6 +199,10 @@ export default {
         this.cards = result
         this.dialog = false
       })
+    },
+    clearAlerts(){
+      this.alertDialog = false
+      this.overspeedDrivers = []
     }
   },
   beforeDestroy() {
