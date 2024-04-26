@@ -1,4 +1,8 @@
-# COMP4442
+# Analysis and monitoring system using AWS
+
+COMP4442 Project also...
+
+<img width="454" alt="image" src="https://github.com/samchenghowing/COMP4442/assets/56993697/f8ce1790-f8a1-457a-a30d-32d850cfcc49">
 
 ## Project setup to run the backend application locally
 
